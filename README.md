@@ -51,9 +51,16 @@ After the first visit, the service worker caches game files so you can play with
 
 ### GitHub Pages
 
-After merging to `main`, enable **GitHub Pages** (Settings → Pages → Source: **GitHub Actions**). The workflow deploys automatically. Your game will be at:
+After merging to `main`:
 
-`https://<username>.github.io/pralay/`
+1. Open **Settings → Pages** in the GitHub repo.
+2. Under **Build and deployment → Source**, choose **Deploy from a branch**.
+3. Set **Branch** to `gh-pages` and folder to `/ (root)`, then **Save**.
+4. Wait 1–2 minutes, then open: **https://srijayant.github.io/pralay/**
+
+> **Seeing 404?** Pages is not enabled until you complete step 2–3 above. The deploy workflow runs on every push to `main` and publishes the `gh-pages` branch automatically.
+
+Alternative: set Source to **GitHub Actions** if you prefer the `pages.yml` workflow instead of the `gh-pages` branch.
 
 ## Gameplay
 
