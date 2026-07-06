@@ -1,19 +1,20 @@
-const CACHE_NAME = 'pralay-v1';
+const CACHE_NAME = 'pralay-v2';
 
 const ASSETS = [
   './',
   './index.html',
   './css/style.css',
-  './js/game.js',
-  './js/data/regions.js',
-  './js/data/factions.js',
-  './js/data/events.js',
+  './js/main.js',
+  './js/avatar.js',
+  './js/world.js',
+  './js/data/interactions.js',
   './js/pwa.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
   './icons/icon.svg',
+  './404.html',
 ];
 
 self.addEventListener('install', (event) => {
@@ -36,7 +37,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   if (url.origin !== self.location.origin) {
-    if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
+    if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com') || url.hostname.includes('cdn.jsdelivr.net')) {
       event.respondWith(
         caches.open(CACHE_NAME).then(async (cache) => {
           const cached = await cache.match(event.request);

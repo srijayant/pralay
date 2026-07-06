@@ -5,139 +5,118 @@
     (function () {
       var p = location.pathname;
       var i = p.indexOf('/pralay');
-      var base = i >= 0
-        ? p.slice(0, i + 7) + '/'
-        : (p.endsWith('/') ? p : p.replace(/[^/]*$/, '') || '/');
+      var base = i >= 0 ? p.slice(0, i + 7) + '/' : (p.endsWith('/') ? p : p.replace(/[^/]*$/, '') || '/');
       if (!base.endsWith('/')) base += '/';
       document.write('<base href="' + base + '">');
     })();
   </script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0d0f0a">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#1a1030">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Pralay">
-  <title>Pralay — Rebuild Bharat</title>
+  <title>Pralay — Ruins of Bharat</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+Devanagari:wght@400;600&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
   <div id="app">
-    <!-- Title Screen -->
+    <!-- Title -->
     <section id="screen-title" class="screen active">
-      <div class="title-backdrop"></div>
+      <div class="title-bg"></div>
       <div class="title-content">
-        <p class="title-epigraph">पुनर्निर्माण · Punarnirman</p>
-        <h1 class="game-title">PRALAY</h1>
-        <p class="game-subtitle">Rebuild the fractured subcontinent after the Great Sundering</p>
-        <p class="title-year">2087 CE · 43 years after the collapse</p>
-        <button id="btn-start" class="btn-primary">Begin Rebuilding</button>
-        <button id="btn-lore" class="btn-secondary">World Lore</button>
+        <p class="title-tag">2087 · नवी मुंबई खंडहर</p>
+        <h1>PRALAY</h1>
+        <p class="title-sub">Open-world ruins. Create your survivor. Explore the neon wasteland.</p>
+        <button id="btn-play" class="btn-neon">Enter the City</button>
       </div>
     </section>
 
-    <!-- Lore Screen -->
-    <section id="screen-lore" class="screen">
-      <div class="panel lore-panel">
-        <h2>The World After Pralay</h2>
-        <div class="lore-scroll" id="lore-content"></div>
-        <button id="btn-lore-back" class="btn-secondary">Return</button>
+    <!-- Avatar Creator -->
+    <section id="screen-avatar" class="screen">
+      <div class="avatar-layout">
+        <div class="avatar-panel">
+          <h2>Create Your Survivor</h2>
+          <label>Name <input type="text" id="avatar-name" maxlength="16" placeholder="Arjun" value="Arjun"></label>
+          <label>Skin tone
+            <input type="range" id="avatar-skin" min="0" max="4" value="2">
+          </label>
+          <label>Outfit color
+            <input type="color" id="avatar-shirt" value="#e8841a">
+          </label>
+          <label>Pants color
+            <input type="color" id="avatar-pants" value="#2d3a4a">
+          </label>
+          <label>Style
+            <select id="avatar-style">
+              <option value="wanderer">Wanderer</option>
+              <option value="scavenger">Scavenger</option>
+              <option value="monk">River Monk</option>
+            </select>
+          </label>
+          <button id="btn-enter-world" class="btn-neon">Spawn in Navi Ruins</button>
+        </div>
+        <div id="avatar-preview" class="avatar-preview"></div>
       </div>
     </section>
 
-    <!-- Region Selection -->
-    <section id="screen-region" class="screen">
-      <div class="panel">
-        <h2>Choose Your Bastion</h2>
-        <p class="panel-desc">Where will the new Bharat rise from the ashes?</p>
-        <div id="region-grid" class="region-grid"></div>
-        <button id="btn-region-confirm" class="btn-primary" disabled>Establish Bastion</button>
-      </div>
-    </section>
-
-    <!-- Main Game -->
+    <!-- 3D Game -->
     <section id="screen-game" class="screen">
-      <header class="game-header">
-        <div class="header-left">
-          <h1 class="bastion-name" id="bastion-name">—</h1>
-          <span class="turn-badge" id="turn-display">Monsoon Cycle 1</span>
+      <canvas id="game-canvas"></canvas>
+
+      <div id="hud">
+        <div class="hud-top">
+          <span id="hud-name" class="hud-name">—</span>
+          <span id="hud-zone" class="hud-zone">Navi Ruins</span>
         </div>
-        <div class="header-right">
-          <span class="era-label" id="era-label">Age of Scarcity</span>
+        <div id="hud-prompt" class="hud-prompt hidden">
+          <span id="prompt-key">E</span>
+          <span id="prompt-text">Interact</span>
         </div>
-      </header>
-
-      <div class="game-layout">
-        <aside class="stats-panel">
-          <h3>Vital Signs</h3>
-          <div id="stats-container"></div>
-          <h3>Territories</h3>
-          <div id="territories-list" class="territories-list"></div>
-          <h3>Faction Standing</h3>
-          <div id="factions-list" class="factions-list"></div>
-        </aside>
-
-        <main class="main-panel">
-          <div class="map-container">
-            <svg id="india-map" viewBox="0 0 400 480" class="india-map" aria-label="Map of fractured Bharat"></svg>
-          </div>
-          <div class="event-panel">
-            <h3 id="event-title">The Cycle Begins</h3>
-            <p id="event-text" class="event-text"></p>
-            <div id="choices-container" class="choices-container"></div>
-          </div>
-        </main>
-
-        <aside class="log-panel">
-          <h3>Chronicle</h3>
-          <div id="chronicle-log" class="chronicle-log"></div>
-        </aside>
+        <div id="hud-dialogue" class="hud-dialogue hidden">
+          <strong id="dialogue-speaker">—</strong>
+          <p id="dialogue-text"></p>
+          <button id="dialogue-next" class="btn-small">Continue</button>
+        </div>
+        <div id="hud-log" class="hud-log"></div>
       </div>
 
-      <footer class="game-footer">
-        <button id="btn-build" class="btn-action" title="Invest resources to expand">Build</button>
-        <button id="btn-explore" class="btn-action" title="Send scouts into the wasteland">Explore</button>
-        <button id="btn-diplomacy" class="btn-action" title="Negotiate with factions">Diplomacy</button>
-        <button id="btn-rest" class="btn-action" title="Skip cycle to recover">Rest Cycle</button>
-      </footer>
+      <!-- Mobile controls -->
+      <div id="mobile-controls" class="mobile-controls">
+        <div id="joystick-zone" class="joystick-zone"><div id="joystick-knob" class="joystick-knob"></div></div>
+        <button id="btn-run" class="mobile-btn mobile-run">RUN</button>
+        <button id="btn-interact" class="mobile-btn mobile-interact">E</button>
+      </div>
+
+      <div class="controls-hint desktop-only">
+        WASD move · Shift run · E interact · Mouse drag look · Esc pause
+      </div>
     </section>
 
-    <!-- Build Modal -->
-    <div id="modal-build" class="modal hidden">
-      <div class="modal-content">
-        <h3>Construct & Restore</h3>
-        <div id="build-options" class="build-options"></div>
-        <button class="btn-secondary modal-close" data-modal="modal-build">Close</button>
-      </div>
-    </div>
-
-    <!-- Diplomacy Modal -->
-    <div id="modal-diplomacy" class="modal hidden">
-      <div class="modal-content">
-        <h3>Faction Diplomacy</h3>
-        <div id="diplomacy-options" class="diplomacy-options"></div>
-        <button class="btn-secondary modal-close" data-modal="modal-diplomacy">Close</button>
-      </div>
-    </div>
-
-    <!-- End Screen -->
-    <section id="screen-end" class="screen">
-      <div class="panel end-panel">
-        <h2 id="end-title">—</h2>
-        <p id="end-text" class="end-text"></p>
-        <div id="end-stats" class="end-stats"></div>
-        <button id="btn-restart" class="btn-primary">Begin Anew</button>
+    <!-- Pause -->
+    <section id="screen-pause" class="screen overlay">
+      <div class="pause-panel">
+        <h2>Paused</h2>
+        <button id="btn-resume" class="btn-neon">Resume</button>
+        <button id="btn-quit" class="btn-ghost">Main Menu</button>
       </div>
     </section>
   </div>
 
-  <script type="module" src="js/game.js"></script>
+  <script type="module" src="js/main.js"></script>
   <script src="js/pwa.js" defer></script>
 </body>
 </html>

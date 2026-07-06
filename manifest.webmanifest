@@ -1,7 +1,7 @@
 {
   "name": "Pralay — Rebuild Bharat",
   "short_name": "Pralay",
-  "description": "Post-apocalyptic India world-building strategy game. Rebuild the fractured subcontinent after the Great Sundering.",
+  "description": "3D open-world post-apocalyptic India. Create your avatar and explore the neon ruins of Navi Mumbai.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
