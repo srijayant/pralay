@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Pralay app icon">
+  <rect width="512" height="512" fill="#0d0f0a"/>
+  <circle cx="256" cy="256" r="215" fill="#e8841a"/>
+  <circle cx="256" cy="256" r="145" fill="#0d0f0a"/>
+  <path d="M 200 140 Q 240 200 230 280 Q 220 360 260 390 Q 300 360 290 280 Q 280 200 320 140 Q 270 120 256 120 Q 242 120 200 140 Z" fill="#1a6b5c"/>
+  <circle cx="256" cy="256" r="62" fill="#f4c430"/>
+</svg>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function () {
+      var p = location.pathname;
+      var i = p.indexOf('/pralay');
+      var base = i >= 0 ? p.slice(0, i + 7) + '/' : (p.endsWith('/') ? p : p.replace(/[^/]*$/, '') || '/');
+      if (!base.endsWith('/')) base += '/';
+      document.write('<base href="' + base + '">');
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#1a1030">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Pralay">
+  <title>Pralay — Ruins of Bharat</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+Devanagari:wght@400;600&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <!-- Title -->
+    <section id="screen-title" class="screen active">
+      <div class="title-bg"></div>
+      <div class="title-content">
+        <p class="title-tag">2087 · मुंबई खंडहर</p>
+        <h1>PRALAY</h1>
+        <p class="title-sub">Marine Drive to Dharavi. Create your survivor. Explore flooded Mumbai.</p>
+        <button id="btn-play" class="btn-neon">Enter the City</button>
+      </div>
+    </section>
+
+    <!-- Avatar Creator -->
+    <section id="screen-avatar" class="screen">
+      <div class="avatar-layout">
+        <div class="avatar-panel">
+          <h2>Create Your Survivor</h2>
+          <label>Name <input type="text" id="avatar-name" maxlength="16" placeholder="Arjun" value="Arjun"></label>
+          <label>Skin tone
+            <input type="range" id="avatar-skin" min="0" max="4" value="2">
+          </label>
+          <label>Outfit color
+            <input type="color" id="avatar-shirt" value="#e8841a">
+          </label>
+          <label>Pants color
+            <input type="color" id="avatar-pants" value="#2d3a4a">
+          </label>
+          <label>Style
+            <select id="avatar-style">
+              <option value="wanderer">Wanderer</option>
+              <option value="scavenger">Scavenger</option>
+              <option value="monk">River Monk</option>
+            </select>
+          </label>
+          <button id="btn-enter-world" class="btn-neon">Spawn on Marine Drive</button>
+        </div>
+        <div id="avatar-preview" class="avatar-preview"></div>
+      </div>
+    </section>
+
+    <!-- 3D Game -->
+    <section id="screen-game" class="screen">
+      <canvas id="game-canvas"></canvas>
+
+      <div id="hud" class="pubg-hud">
+        <!-- Compass -->
+        <div class="hud-compass">
+          <div class="compass-track">
+            <span>N</span><span>NE</span><span>E</span><span>SE</span><span>S</span><span>SW</span><span>W</span><span>NW</span>
+          </div>
+          <div id="compass-needle" class="compass-needle">▼</div>
+          <span id="compass-label" class="compass-label">N</span>
+        </div>
+
+        <!-- Player card (top left) -->
+        <div class="hud-player-card">
+          <div class="player-row">
+            <span class="player-icon">◉</span>
+            <span id="hud-name" class="hud-name">—</span>
+            <span id="hud-zone" class="hud-zone">Marine Drive</span>
+          </div>
+          <div class="stat-bar">
+            <span class="stat-icon hp">♥</span>
+            <div class="bar-track"><div id="bar-health" class="bar-fill bar-hp"></div></div>
+          </div>
+          <div class="stat-bar">
+            <span class="stat-icon st">⚡</span>
+            <div class="bar-track"><div id="bar-stamina" class="bar-fill bar-st"></div></div>
+          </div>
+        </div>
+
+        <!-- Minimap (top right) -->
+        <div class="hud-minimap-wrap">
+          <canvas id="minimap" width="130" height="130"></canvas>
+          <span class="minimap-label">MAP</span>
+          <span id="hud-coords" class="minimap-coords">0, 0</span>
+        </div>
+
+        <!-- Kill feed style log -->
+        <div id="hud-feed" class="hud-feed"></div>
+
+        <!-- Crosshair -->
+        <div class="crosshair"></div>
+
+        <!-- Interact prompt -->
+        <div id="hud-prompt" class="hud-prompt hidden">
+          <span class="prompt-btn">F</span>
+          <span id="prompt-text">Interact</span>
+        </div>
+
+        <!-- Dialogue panel -->
+        <div id="hud-dialogue" class="hud-dialogue hidden">
+          <div class="dialogue-header">
+            <strong id="dialogue-speaker">—</strong>
+            <button id="dialogue-next" class="btn-dialogue-next">▶ NEXT</button>
+          </div>
+          <p id="dialogue-text"></p>
+        </div>
+      </div>
+
+      <!-- PUBG-style mobile controls -->
+      <div id="mobile-controls" class="mobile-controls pubg-controls">
+        <div id="joystick-zone" class="joystick-zone">
+          <div id="joystick-knob" class="joystick-knob"></div>
+        </div>
+        <div class="action-cluster">
+          <button id="btn-run" class="pubg-btn pubg-btn-sprint" title="Sprint">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.6 11 16.5 12.5 16.5 15H19c0-2.9-2-5.4-4.5-6.2l-1-5.8H9.8z"/></svg>
+          </button>
+          <button id="btn-interact" class="pubg-btn pubg-btn-action" title="Interact">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2a5 5 0 0 1 5 5v1h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h2V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v1h6V7a3 3 0 0 0-3-3z"/></svg>
+          </button>
+          <button id="btn-pause-mobile" class="pubg-btn pubg-btn-menu" title="Menu">☰</button>
+        </div>
+      </div>
+
+      <div class="controls-hint desktop-only">
+        WASD · Shift sprint · E interact · Drag to look · Esc menu
+      </div>
+    </section>
+
+    <!-- Pause -->
+    <section id="screen-pause" class="screen overlay">
+      <div class="pause-panel">
+        <h2>Paused</h2>
+        <button id="btn-resume" class="btn-neon">Resume</button>
+        <button id="btn-quit" class="btn-ghost">Main Menu</button>
+      </div>
+    </section>
+  </div>
+
+  <div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loading-spinner"></div>
+    <p id="loading-text">Loading Mumbai…</p>
+  </div>
+
+  <script type="module" src="js/boot.js"></script>
+  <script src="js/pwa.js" defer></script>
+</body>
+</html>
