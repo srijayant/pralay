@@ -41,16 +41,16 @@ document.getElementById('btn-play')?.addEventListener('click', async () => {
 
 document.getElementById('btn-enter-world')?.addEventListener('click', async () => {
   const btn = document.getElementById('btn-enter-world');
-  setButtonLoading(btn, true, 'Spawn in Navi Ruins');
+  setButtonLoading(btn, true, 'Spawn on Marine Drive');
   try {
     const { stopPreview, startGame } = await import('./main.js');
     stopPreview();
-    startGame();
+    await startGame();
   } catch (err) {
     console.error(err);
     showLoadError(err.message || 'Unknown error');
   } finally {
-    setButtonLoading(btn, false, 'Spawn in Navi Ruins');
+    setButtonLoading(btn, false, 'Spawn on Marine Drive');
   }
 });
 

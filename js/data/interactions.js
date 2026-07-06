@@ -2,13 +2,12 @@ export const INTERACTABLES = [
   {
     id: 'chai-wallah',
     name: 'Raju — Chai Wallah',
-    position: [12, 0, -8],
+    position: [10, 0, -6],
     type: 'npc',
-    color: 0xff6b35,
     dialogue: [
-      'Namaste, wanderer. Rupee chai is five salvage chips. Best in the bazaar.',
-      'The monsoon broke three years running. We adapt — masala never fails.',
-      'Saw Mirage Caravans head east at dawn. They trade water for copper wire.',
+      'Namaste, wanderer. Cutting chai is five salvage chips. Best on Colaba Causeway.',
+      'Marine Drive floods every monsoon now. We serve from this stall since the Sundering.',
+      'Mirage Caravans passed at dawn — headed toward the old Bandra reclamation.',
     ],
   },
   {
@@ -16,94 +15,89 @@ export const INTERACTABLES = [
     name: 'Dr. Meera — Vardhaki',
     position: [-18, 0, 14],
     type: 'npc',
-    color: 0x4ecdc4,
     dialogue: [
-      'This grid ran on tidal power once. Mumbai slept with lights on. Imagine.',
-      'I can teach you to read old circuit maps — if you bring me capacitor cells.',
-      'The Sangam Council wants my filters. I want independence. Typical politics.',
+      'CST station ran on tidal power once. Victoria Terminus — they called it UNESCO heritage.',
+      'I salvage circuit maps from flooded first-class compartments below platform three.',
+      'The flyover still stands. I dream of linking solar grids across the seven islands again.',
     ],
   },
   {
     id: 'shrine',
-    name: 'Memory Shrine',
-    position: [0, 0, 22],
+    name: 'Siddhivinayak Ruins',
+    position: [0, 0, 24],
     type: 'object',
-    color: 0xf4c430,
     dialogue: [
-      'Names carved into salvaged marble — thousands who did not survive the Sundering.',
-      'You light a diya. The flame reflects in cracked glass. Someone whispers a prayer.',
-      'Faith is not escape here. It is how we remember who we were.',
+      'A Ganesh murti half-buried in rubble — trunk raised in blessing amid the dust.',
+      'Marigold garlands dry on rusted railings. Someone still leaves modaks every Tuesday.',
+      'Faith outlasted the sea walls. Mumbai prays even when the city drowns.',
     ],
   },
   {
     id: 'metro',
-    name: 'Flooded Metro Entrance',
-    position: [-8, 0, -22],
+    name: 'Flooded Metro — Line 3',
+    position: [-8, 0, -20],
     type: 'object',
-    color: 0x6b8cae,
     dialogue: [
-      'Stairs descend into black water. Emergency lights still blink below.',
-      'Scavengers say sealed train cars hold pre-Sundering data drives.',
+      'Escalators vanish into Arabian Sea backwash. This was meant to link Colaba to SEEPZ.',
+      'Scavengers dive for sealed server racks in the tunnels — pre-Sundering data.',
       "A child's chalk drawing on the wall: home is up.",
     ],
   },
   {
     id: 'rickshaw',
     name: 'Abandoned Auto-Rickshaw',
-    position: [22, 0, 6],
+    position: [18, 0, 2],
     type: 'vehicle',
-    color: 0x2ecc71,
     dialogue: [
-      'Green and yellow paint peeled by salt wind. Engine gutted for parts.',
-      'Inside: a cassette labelled "Bollywood Hits 2039". The past has a soundtrack.',
-      'You could restore it someday. For now, it is shelter from the dust.',
+      'Green and yellow — the last colours of old Mumbai. Engine stripped for solar parts.',
+      'Inside: a cassette labelled Bollywood Hits 2039. The city had a soundtrack.',
+      'From here you can see the Gateway ruins. Tourists came from everywhere once.',
     ],
   },
   {
     id: 'vendor',
     name: 'Lakshmi — Spice Vendor',
-    position: [-14, 0, -16],
+    position: [-14, 0, -14],
     type: 'npc',
-    color: 0xe056fd,
     dialogue: [
-      'Turmeric, dried chilli, black cardamom — the old world in small bags.',
-      'Vanara tribes guard the Ghats seeds. I trade stories for samples.',
-      'Take this pouch. On hard days, flavour is medicine.',
+      'Malvani masala, Kashmiri chilli, Konkan kokum — flavours of a united Bharat.',
+      'Dharavi lane still grows herbs on terrace plots. Best turmeric in the wasteland.',
+      'Take this pouch. On hard days, taste is memory.',
     ],
     action: { type: 'item', name: 'Spice Pouch', log: 'Received Spice Pouch from Lakshmi.' },
   },
   {
     id: 'watchtower',
-    name: 'Signal Watchtower',
-    position: [28, 0, -20],
+    name: 'Marine Drive Watchtower',
+    position: [28, 0, -26],
     type: 'object',
-    color: 0xff9f43,
     dialogue: [
-      'Heliograph mirrors catch the sunset. Someone is signalling from the Deccan ridge.',
-      'Coordinates blink in Morse — survivors requesting medicine.',
-      'You note the pattern. The wasteland is not as empty as it seems.',
+      'Heliograph signals bounce off Art Deco facades — someone is calling from Worli.',
+      'The Queen\'s Necklace used to glitter with car headlights. Now only salvage lanterns.',
+      'You note the Morse pattern. Mumbai is fractured, but not silent.',
     ],
   },
   {
     id: 'tiger-mural',
-    name: 'Tiger Corridor Mural',
-    position: [-24, 0, 4],
+    name: 'Tiger Corridor Mural — Dharavi',
+    position: [-24, 0, 6],
     type: 'object',
-    color: 0xe67e22,
     dialogue: [
-      'A painted Bengal tiger spans the wall — stripes glowing under UV salvage paint.',
-      'Vanara mark: this street is shared with the forest. Do not hunt here.',
-      'The city and jungle negotiate borders in colour and myth.',
+      'A Bengal tiger painted across chawl brick — Sanjay Gandhi National Park remembers.',
+      'Vanara mark: share the lane with the forest. The slum and jungle made a treaty.',
+      'Real tigers were spotted near Aarey colony last year. The wild reclaims what we left.',
     ],
   },
 ];
 
 export const ZONES = [
-  { name: 'Navi Ruins', x: 0, z: 0, radius: 25 },
-  { name: 'Bazaar Row', x: 12, z: -8, radius: 12 },
-  { name: 'Metro Sink', x: -8, z: -22, radius: 10 },
-  { name: 'Temple Quarter', x: 0, z: 22, radius: 12 },
-  { name: 'Engineer\'s End', x: -18, z: 14, radius: 10 },
+  { name: 'Marine Drive', x: 0, z: -18, radius: 18 },
+  { name: 'Colaba Causeway', x: 10, z: -8, radius: 12 },
+  { name: 'Gateway Quarter', x: -6, z: -30, radius: 10 },
+  { name: 'Dharavi Lane', x: -24, z: 10, radius: 14 },
+  { name: 'CST Station Ruins', x: 20, z: 24, radius: 12 },
+  { name: 'Temple Quarter', x: 0, z: 24, radius: 10 },
+  { name: 'Art Deco Row', x: 24, z: -6, radius: 12 },
 ];
 
 export function getZoneAt(x, z) {
@@ -112,5 +106,6 @@ export function getZoneAt(x, z) {
     const dz = z - zone.z;
     if (dx * dx + dz * dz < zone.radius * zone.radius) return zone.name;
   }
-  return 'Wasteland Edge';
+  if (z < -32) return 'Arabian Sea Promenade';
+  return 'Seven Islands Wasteland';
 }

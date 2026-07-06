@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { buildAvatarMesh, animateAvatarWalk, readAvatarForm } from './avatar.js';
+import { createCharacter, updateCharacterAnim, readAvatarForm } from './character.js';
 import { World } from './world.js';
 import { getZoneAt } from './data/interactions.js';
 
@@ -24,35 +24,31 @@ function addLog(text) {
 }
 
 class Game3D {
-  constructor(canvas, avatarConfig) {
+  constructor(canvas, avatarConfig, player) {
     this.config = avatarConfig;
     this.paused = false;
     this.keys = {};
     this.mobileInput = { x: 0, y: 0, run: false };
-    this.yaw = 0;
-    this.pitch = 0.25;
+    this.yaw = Math.PI;
     this.nearby = null;
     this.dialogueQueue = [];
     this.dialogueIndex = 0;
-    this.walkTime = 0;
 
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
+    this.renderer.toneMappingExposure = 1.15;
 
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x3d2a4a, 0.006);
+    this.scene.fog = new THREE.FogExp2(0x8a7a6a, 0.0045);
 
-    this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 400);
-
+    this.camera = new THREE.PerspectiveCamera(58, 1, 0.1, 400);
     this.world = new World(this.scene);
-    this.world.build();
 
-    this.player = buildAvatarMesh(avatarConfig);
-    this.player.position.set(0, 0, 0);
+    this.player = player;
+    this.player.position.set(-2, 0, -14);
     this.scene.add(this.player);
 
     this._lights();
@@ -61,32 +57,35 @@ class Game3D {
     window.addEventListener('resize', () => this._resize());
 
     document.getElementById('hud-name').textContent = avatarConfig.name;
-    addLog(`${avatarConfig.name} enters the Navi Ruins.`);
+    addLog(`${avatarConfig.name} walks onto Marine Drive.`);
+  }
+
+  static async create(canvas, avatarConfig) {
+    const instance = new Game3D(canvas, avatarConfig, await createCharacter(avatarConfig));
+    await instance.world.build();
+    return instance;
   }
 
   _lights() {
-    const ambient = new THREE.HemisphereLight(0xffa066, 0x1a1030, 0.55);
-    this.scene.add(ambient);
-
-    const sun = new THREE.DirectionalLight(0xffb347, 1.1);
-    sun.position.set(-40, 60, 30);
+    this.scene.add(new THREE.HemisphereLight(0xc9b8a8, 0x3a4a5a, 0.65));
+    const sun = new THREE.DirectionalLight(0xffa85a, 0.95);
+    sun.position.set(-50, 45, 20);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
     sun.shadow.camera.near = 1;
-    sun.shadow.camera.far = 150;
-    sun.shadow.camera.left = -60;
-    sun.shadow.camera.right = 60;
-    sun.shadow.camera.top = 60;
-    sun.shadow.camera.bottom = -60;
+    sun.shadow.camera.far = 180;
+    const s = 70;
+    sun.shadow.camera.left = -s;
+    sun.shadow.camera.right = s;
+    sun.shadow.camera.top = s;
+    sun.shadow.camera.bottom = -s;
     this.scene.add(sun);
 
-    const neon = new THREE.PointLight(0xff6b6b, 0.8, 40);
-    neon.position.set(12, 5, -8);
-    this.scene.add(neon);
-
-    const teal = new THREE.PointLight(0x48dbfb, 0.6, 35);
-    teal.position.set(-18, 5, 14);
-    this.scene.add(teal);
+    [[12, 6, -8, 0xff6b6b], [-18, 5, 14, 0x48dbfb], [0, 4, -28, 0xf4c430]].forEach(([x, y, z, c]) => {
+      const pl = new THREE.PointLight(c, 0.7, 45);
+      pl.position.set(x, y, z);
+      this.scene.add(pl);
+    });
   }
 
   _bindInput() {
@@ -130,10 +129,7 @@ class Game3D {
       let dx = cx - startX;
       let dy = cy - startY;
       const dist = Math.hypot(dx, dy);
-      if (dist > maxDist) {
-        dx = (dx / dist) * maxDist;
-        dy = (dy / dist) * maxDist;
-      }
+      if (dist > maxDist) { dx = (dx / dist) * maxDist; dy = (dy / dist) * maxDist; }
       knob.style.transform = `translate(${dx}px, ${dy}px)`;
       this.mobileInput.x = dx / maxDist;
       this.mobileInput.y = dy / maxDist;
@@ -177,12 +173,10 @@ class Game3D {
     if (this.keys.KeyS || this.keys.ArrowDown) mz += 1;
     if (this.keys.KeyA || this.keys.ArrowLeft) mx -= 1;
     if (this.keys.KeyD || this.keys.ArrowRight) mx += 1;
-
     if (Math.abs(this.mobileInput.x) > 0.1 || Math.abs(this.mobileInput.y) > 0.1) {
       mx = this.mobileInput.x;
       mz = this.mobileInput.y;
     }
-
     const len = Math.hypot(mx, mz);
     if (len > 1) { mx /= len; mz /= len; }
     return { mx, mz, running: this.keys.ShiftLeft || this.keys.ShiftRight || this.mobileInput.run };
@@ -192,7 +186,7 @@ class Game3D {
     if (this.paused) return;
 
     const { mx, mz, running } = this._getMoveInput();
-    const speed = running ? 9 : 5;
+    const speed = running ? 8 : 4.5;
     const moving = Math.hypot(mx, mz) > 0.05;
 
     if (moving) {
@@ -205,23 +199,21 @@ class Game3D {
 
       const nx = this.player.position.x + dir.x * speed * dt;
       const nz = this.player.position.z + dir.z * speed * dt;
-
       if (!this.world.checkCollision(nx, this.player.position.z)) this.player.position.x = nx;
       if (!this.world.checkCollision(this.player.position.x, nz)) this.player.position.z = nz;
 
       const targetRot = Math.atan2(dir.x, dir.z);
-      this.player.rotation.y = THREE.MathUtils.lerp(this.player.rotation.y, targetRot, 0.15);
-      this.walkTime += dt;
+      this.player.rotation.y = THREE.MathUtils.lerp(this.player.rotation.y, targetRot, 0.18);
     }
 
-    animateAvatarWalk(this.player, this.walkTime, moving ? speed : 0);
+    updateCharacterAnim(this.player, dt, moving ? speed : 0);
 
-    const camDist = 7;
-    const camH = 3.5;
+    const camDist = 6.5;
+    const camH = 2.8;
     const cx = this.player.position.x + Math.sin(this.yaw) * camDist;
     const cz = this.player.position.z + Math.cos(this.yaw) * camDist;
-    this.camera.position.lerp(new THREE.Vector3(cx, this.player.position.y + camH, cz), 0.08);
-    this.camera.lookAt(this.player.position.x, this.player.position.y + 1.4, this.player.position.z);
+    this.camera.position.lerp(new THREE.Vector3(cx, this.player.position.y + camH, cz), 0.1);
+    this.camera.lookAt(this.player.position.x, this.player.position.y + 1.35, this.player.position.z);
 
     this.world.update(dt);
     this._updateInteractables();
@@ -231,18 +223,15 @@ class Game3D {
   _updateInteractables() {
     let closest = null;
     let closestDist = Infinity;
-
     for (const obj of this.world.interactables) {
       const dist = this.player.position.distanceTo(obj.position);
       const ring = obj.getObjectByName('highlight');
       if (ring) ring.visible = false;
-
-      if (dist < 3 && dist < closestDist) {
+      if (dist < 3.5 && dist < closestDist) {
         closest = obj;
         closestDist = dist;
       }
     }
-
     this.nearby = closest;
     const prompt = document.getElementById('hud-prompt');
     if (closest) {
@@ -259,15 +248,12 @@ class Game3D {
     const data = this.nearby.userData.interactable;
     this.dialogueQueue = [...data.dialogue];
     this.dialogueIndex = 0;
-    if (data.action) {
-      addLog(data.action.log);
-    }
+    if (data.action) addLog(data.action.log);
     this._showDialogue(data.name, this.dialogueQueue[0]);
   }
 
   _showDialogue(speaker, text) {
-    const box = document.getElementById('hud-dialogue');
-    box?.classList.remove('hidden');
+    document.getElementById('hud-dialogue')?.classList.remove('hidden');
     document.getElementById('dialogue-speaker').textContent = speaker;
     document.getElementById('dialogue-text').textContent = text;
     this.paused = true;
@@ -276,7 +262,6 @@ class Game3D {
   _advanceDialogue() {
     this.dialogueIndex += 1;
     if (this.dialogueIndex < this.dialogueQueue.length) {
-      const data = this.nearby.userData.interactable;
       document.getElementById('dialogue-text').textContent = this.dialogueQueue[this.dialogueIndex];
       return;
     }
@@ -286,8 +271,7 @@ class Game3D {
 
   togglePause() {
     this.paused = !this.paused;
-    if (this.paused) showScreen('screen-pause');
-    else showScreen('screen-game');
+    showScreen(this.paused ? 'screen-pause' : 'screen-game');
   }
 
   start() {
@@ -307,7 +291,7 @@ class Game3D {
   }
 }
 
-function initAvatarPreview() {
+export async function initAvatarPreview() {
   const container = document.getElementById('avatar-preview');
   if (!container) return;
 
@@ -319,43 +303,43 @@ function initAvatarPreview() {
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x1a1030);
+  scene.background = new THREE.Color(0x2a2038);
   const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 50);
-  camera.position.set(0, 1.6, 4);
-  camera.lookAt(0, 1.2, 0);
+  camera.position.set(0, 1.5, 3.8);
+  camera.lookAt(0, 1.1, 0);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-  const light = new THREE.DirectionalLight(0xffb347, 1.2);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  const light = new THREE.DirectionalLight(0xffa85a, 1.1);
   light.position.set(2, 4, 3);
   scene.add(light);
 
-  let avatar = buildAvatarMesh(readAvatarForm());
+  let avatar = await createCharacter(readAvatarForm());
   scene.add(avatar);
 
-  const refresh = () => {
+  const refresh = async () => {
     scene.remove(avatar);
-    avatar = buildAvatarMesh(readAvatarForm());
+    avatar = await createCharacter(readAvatarForm());
     scene.add(avatar);
+    if (previewScene) previewScene.avatar = avatar;
   };
 
-  ['avatar-name', 'avatar-skin', 'avatar-shirt', 'avatar-pants', 'avatar-style'].forEach((id) => {
-    document.getElementById(id)?.addEventListener('input', refresh);
-    document.getElementById(id)?.addEventListener('change', refresh);
+  ['avatar-skin', 'avatar-shirt', 'avatar-pants', 'avatar-style'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('input', () => refresh());
+    document.getElementById(id)?.addEventListener('change', () => refresh());
   });
 
   previewScene = { renderer, scene, camera, avatar, t: 0 };
   const spin = (time) => {
     if (!previewScene) return;
-    previewScene.t = time;
     previewScene.avatar.rotation.y = time * 0.0008;
-    animateAvatarWalk(previewScene.avatar, time * 0.001, 3);
+    updateCharacterAnim(previewScene.avatar, 0.016, 2);
     previewScene.renderer.render(previewScene.scene, previewScene.camera);
     previewScene.raf = requestAnimationFrame(spin);
   };
   spin(0);
 }
 
-function stopPreview() {
+export function stopPreview() {
   if (previewScene) {
     cancelAnimationFrame(previewScene.raf);
     previewScene.renderer.dispose();
@@ -364,27 +348,21 @@ function stopPreview() {
   }
 }
 
-export function startGame() {
+export async function startGame() {
   const config = readAvatarForm();
   showScreen('screen-game');
   const canvas = document.getElementById('game-canvas');
-  game = new Game3D(canvas, config);
+  game = await Game3D.create(canvas, config);
   game.start();
 }
 
 export function bindPauseUI() {
   document.getElementById('btn-resume')?.addEventListener('click', () => {
-    if (game) {
-      game.paused = false;
-      showScreen('screen-game');
-    }
+    if (game) { game.paused = false; showScreen('screen-game'); }
   });
-
   document.getElementById('btn-quit')?.addEventListener('click', () => {
     game?.dispose();
     game = null;
     showScreen('screen-title');
   });
 }
-
-export { initAvatarPreview, stopPreview };
