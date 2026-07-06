@@ -14,6 +14,20 @@ python3 -m http.server 8080
 
 Then visit [http://localhost:8080](http://localhost:8080).
 
+### Play on your phone
+
+The game runs in mobile browsers (Chrome, Safari, Firefox). You need to serve it over HTTP — opening the HTML file directly on a phone often blocks ES modules.
+
+**Same Wi‑Fi network:**
+
+```bash
+python3 -m http.server 8080 --bind 0.0.0.0
+```
+
+On your phone, open `http://<your-computer-ip>:8080` (e.g. `http://192.168.1.5:8080`). Find your IP with `ip addr` or `ifconfig`.
+
+For play anywhere, deploy the folder to GitHub Pages, Netlify, or any static host.
+
 ## Gameplay
 
 - **Choose a region** — Ganga Basin, Deccan Plateau, Western Ghats, Thar Corridor, Himalayan Refuge, or Coastal Shores
