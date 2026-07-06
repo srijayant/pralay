@@ -51,16 +51,21 @@ After the first visit, the service worker caches game files so you can play with
 
 ### GitHub Pages
 
-After merging to `main`:
+The deploy workflow already publishes to the `gh-pages` branch on every push to `main`. You still need to **turn Pages on** in the repo:
 
-1. Open **Settings → Pages** in the GitHub repo.
-2. Under **Build and deployment → Source**, choose **Deploy from a branch**.
-3. Set **Branch** to `gh-pages` and folder to `/ (root)`, then **Save**.
+1. Open **https://github.com/srijayant/pralay/settings/pages**
+2. Under **Build and deployment → Source**, choose **Deploy from a branch**
+3. Set **Branch** to `gh-pages`, folder **/ (root)**, then **Save**
 4. Wait 1–2 minutes, then open: **https://srijayant.github.io/pralay/**
 
-> **Seeing 404?** Pages is not enabled until you complete step 2–3 above. The deploy workflow runs on every push to `main` and publishes the `gh-pages` branch automatically.
+#### Still seeing 404?
 
-Alternative: set Source to **GitHub Actions** if you prefer the `pages.yml` workflow instead of the `gh-pages` branch.
+**Private repository:** GitHub Pages on a private repo is not publicly reachable on the free plan. Either:
+
+- **Make the repo public** (Settings → General → Change repository visibility), then wait for Pages to update, **or**
+- **Use Netlify** (drag the project folder onto [app.netlify.com/drop](https://app.netlify.com/drop)) for a free public URL without changing repo visibility
+
+**Wrong URL:** Use the trailing slash — `https://srijayant.github.io/pralay/` (not `/pralay` without the slash).
 
 ## Gameplay
 
