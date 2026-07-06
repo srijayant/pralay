@@ -1,11 +1,12 @@
 import * as THREE from 'three';
+import { IS_MOBILE, surf } from './materials.js';
 
 export const SKIN_TONES = ['#3d2314', '#6b4423', '#a67c52', '#d4a574', '#f0d5b8'];
 
 function capsule(radius, length, material) {
   const geo = new THREE.CapsuleGeometry(radius, length, 6, 12);
   const mesh = new THREE.Mesh(geo, material);
-  mesh.castShadow = true;
+  mesh.castShadow = !IS_MOBILE;
   return mesh;
 }
 
@@ -15,11 +16,11 @@ function buildProceduralHuman(config) {
   const shirt = new THREE.Color(config.shirt);
   const pants = new THREE.Color(config.pants);
 
-  const skinMat = new THREE.MeshStandardMaterial({ color: skin, roughness: 0.55 });
-  const shirtMat = new THREE.MeshStandardMaterial({ color: shirt, roughness: 0.65 });
-  const pantsMat = new THREE.MeshStandardMaterial({ color: pants, roughness: 0.7 });
-  const hairMat = new THREE.MeshStandardMaterial({ color: 0x120c08, roughness: 0.95 });
-  const shoeMat = new THREE.MeshStandardMaterial({ color: 0x1a1410, roughness: 0.8 });
+  const skinMat = surf(skin);
+  const shirtMat = surf(shirt);
+  const pantsMat = surf(pants);
+  const hairMat = surf(0x120c08);
+  const shoeMat = surf(0x1a1410);
 
   const pelvis = new THREE.Group();
   pelvis.position.y = 0.95;
@@ -85,12 +86,12 @@ function buildProceduralHuman(config) {
   if (config.style === 'monk') {
     const robe = new THREE.Mesh(
       new THREE.CylinderGeometry(0.28, 0.38, 1.15, 12),
-      new THREE.MeshStandardMaterial({ color: 0xf4c430, roughness: 0.8 })
+      surf(0xf4c430)
     );
     robe.position.y = 0.55;
     group.add(robe);
   } else if (config.style === 'scavenger') {
-    const vest = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.5, 0.28), new THREE.MeshStandardMaterial({ color: 0x4a3728 }));
+    const vest = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.5, 0.28), surf(0x4a3728));
     vest.position.y = 1.2;
     group.add(vest);
   }

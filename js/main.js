@@ -51,14 +51,23 @@ class Game3D {
       antialias: !IS_MOBILE,
       powerPreference: IS_MOBILE ? 'low-power' : 'high-performance',
     });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, IS_MOBILE ? 1.5 : 2));
-    this.renderer.shadowMap.enabled = !IS_MOBILE;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, IS_MOBILE ? 1.25 : 2));
+    this.renderer.shadowMap.enabled = false;
+    if (IS_MOBILE) {
+      this.renderer.toneMapping = THREE.NoToneMapping;
+    } else {
+      this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      this.renderer.toneMappingExposure = 1.15;
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    }
 
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x8a7a6a, IS_MOBILE ? 0.005 : 0.0045);
+    if (IS_MOBILE) {
+      this.scene.background = new THREE.Color(0xc9886a);
+    } else {
+      this.scene.fog = new THREE.FogExp2(0x8a7a6a, 0.0045);
+    }
 
     this.camera = new THREE.PerspectiveCamera(58, 1, 0.1, 300);
     this.world = new World(this.scene);
@@ -93,9 +102,10 @@ class Game3D {
   }
 
   _lights() {
-    this.scene.add(new THREE.HemisphereLight(0xc9b8a8, 0x3a4a5a, 0.7));
-    const sun = new THREE.DirectionalLight(0xffa85a, 0.9);
-    sun.position.set(-50, 45, 20);
+    this.scene.add(new THREE.AmbientLight(0xffffff, IS_MOBILE ? 0.9 : 0.45));
+    this.scene.add(new THREE.HemisphereLight(0xffeedd, 0x556677, IS_MOBILE ? 1.1 : 0.65));
+    const sun = new THREE.DirectionalLight(0xffdd99, IS_MOBILE ? 1.4 : 0.9);
+    sun.position.set(30, 50, 20);
     if (!IS_MOBILE) {
       sun.castShadow = true;
       sun.shadow.mapSize.set(1024, 1024);
@@ -238,8 +248,8 @@ class Game3D {
 
     updateCharacterAnim(this.player, dt, moving ? speed : 0);
 
-    const camDist = 6;
-    const camH = 2.6;
+    const camDist = 5.5;
+    const camH = 2.2;
     const cx = this.player.position.x + Math.sin(this.yaw) * camDist;
     const cz = this.player.position.z + Math.cos(this.yaw) * camDist;
     this.camera.position.lerp(new THREE.Vector3(cx, this.player.position.y + camH, cz), 0.1);

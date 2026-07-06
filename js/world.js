@@ -1,12 +1,11 @@
 import * as THREE from 'three';
 import { INTERACTABLES } from './data/interactions.js';
 import { createCharacter } from './character.js';
+import { IS_MOBILE, surf, emissiveSurf } from './materials.js';
 import {
   asphaltTexture, wetAsphaltTexture, concreteTexture,
   artDecoFacadeTexture, brickChawlTexture, signageTexture, matFromTexture,
 } from './textures.js';
-
-const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 export class World {
   constructor(scene) {
@@ -18,6 +17,7 @@ export class World {
   }
 
   build() {
+    this._baseGround();
     this._sky();
     this._arabianSea();
     this._marineDrive();
@@ -29,7 +29,18 @@ export class World {
     this._atmosphere();
   }
 
+  _baseGround() {
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(220, 220),
+      surf(0x4a4540)
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.01;
+    this.scene.add(ground);
+  }
+
   _sky() {
+    if (IS_MOBILE) return;
     const geo = new THREE.SphereGeometry(320, 48, 24);
     const mat = new THREE.ShaderMaterial({
       side: THREE.BackSide,
@@ -64,7 +75,7 @@ export class World {
   _arabianSea() {
     const sea = new THREE.Mesh(
       new THREE.PlaneGeometry(220, 120, 32, 16),
-      new THREE.MeshStandardMaterial({
+      surf({
         color: 0x1a4a6a,
         roughness: 0.15,
         metalness: 0.55,
@@ -107,7 +118,7 @@ export class World {
     promenade.position.set(-9.5, 0.04, -18);
     this.scene.add(promenade);
 
-    const railMat = new THREE.MeshStandardMaterial({ color: 0x888890, metalness: 0.7, roughness: 0.35 });
+    const railMat = surf({ color: 0x888890, metalness: 0.7, roughness: 0.35 });
     for (let z = -60; z < 25; z += 4) {
       const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.1, 6), railMat);
       post.position.set(-7.2, 0.55, z);
@@ -178,7 +189,7 @@ export class World {
     for (let f = 0; f < floors; f++) {
       const balcony = new THREE.Mesh(
         new THREE.BoxGeometry(w * 0.85, 0.12, 1.2),
-        new THREE.MeshStandardMaterial({ color: 0x6a5a4a })
+        surf({ color: 0x6a5a4a })
       );
       balcony.position.set(0, -h / 2 + 2.2 + f * 2.8, d / 2 + 0.5);
       group.add(balcony);
@@ -199,7 +210,7 @@ export class World {
 
     const crown = new THREE.Mesh(
       new THREE.CylinderGeometry(w * 0.35, w * 0.5, 3, 6),
-      new THREE.MeshStandardMaterial({ color: 0x708090, metalness: 0.4, roughness: 0.4 })
+      surf({ color: 0x708090, metalness: 0.4, roughness: 0.4 })
     );
     crown.position.y = h / 2 + 1.5;
     group.add(crown);
@@ -219,7 +230,7 @@ export class World {
     for (let i = 0; i < 8; i++) {
       const chunk = new THREE.Mesh(
         new THREE.BoxGeometry(1 + Math.random() * 2.5, 0.4 + Math.random() * 1.2, 1 + Math.random() * 2),
-        new THREE.MeshStandardMaterial({ color: 0x5a5048 })
+        surf({ color: 0x5a5048 })
       );
       chunk.position.set(x + (Math.random() - 0.5) * w * 1.2, 0.25, z + (Math.random() - 0.5) * w);
       chunk.rotation.y = Math.random() * Math.PI;
@@ -231,17 +242,17 @@ export class World {
   _marketStalls(x, z) {
     const awning = new THREE.Mesh(
       new THREE.BoxGeometry(3.5, 0.08, 2.5),
-      new THREE.MeshStandardMaterial({ color: 0xff6b35 })
+      surf({ color: 0xff6b35 })
     );
     awning.position.set(x, 2.4, z);
     const pole = new THREE.Mesh(
       new THREE.CylinderGeometry(0.05, 0.05, 2.4, 6),
-      new THREE.MeshStandardMaterial({ color: 0x4a4a4a })
+      surf({ color: 0x4a4a4a })
     );
     pole.position.set(x - 1.5, 1.2, z);
     const counter = new THREE.Mesh(
       new THREE.BoxGeometry(3, 0.9, 1.2),
-      new THREE.MeshStandardMaterial({ color: 0x5a4030 })
+      surf({ color: 0x5a4030 })
     );
     counter.position.set(x, 0.45, z);
     this.scene.add(awning, pole, counter);
@@ -271,7 +282,7 @@ export class World {
 
     const dome = new THREE.Mesh(
       new THREE.SphereGeometry(1.2, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2),
-      new THREE.MeshStandardMaterial({ color: 0xf4c430, roughness: 0.45 })
+      surf({ color: 0xf4c430, roughness: 0.45 })
     );
     dome.position.set(0, 6.8, 0);
     group.add(dome);
@@ -297,7 +308,7 @@ export class World {
     for (let i = -4; i <= 4; i++) {
       const spire = new THREE.Mesh(
         new THREE.ConeGeometry(0.5, 3.5, 6),
-        new THREE.MeshStandardMaterial({ color: 0x6a5a4a })
+        surf({ color: 0x6a5a4a })
       );
       spire.position.set(i * 2.2, 13.5, 2);
       group.add(spire);
@@ -305,7 +316,7 @@ export class World {
 
     const clock = new THREE.Mesh(
       new THREE.CircleGeometry(1.2, 24),
-      new THREE.MeshStandardMaterial({ color: 0xf4c430, emissive: 0xf4c430, emissiveIntensity: 0.2 })
+      surf({ color: 0xf4c430, emissive: 0xf4c430, emissiveIntensity: 0.2 })
     );
     clock.position.set(0, 9, 3.05);
     group.add(clock);
@@ -325,7 +336,7 @@ export class World {
     tiers.forEach((r, i) => {
       const dome = new THREE.Mesh(
         new THREE.CylinderGeometry(r, r + 0.4, 1.8, 8),
-        new THREE.MeshStandardMaterial({ color: i === 0 ? 0xf4c430 : 0xd4a030 - i * 0x101010, roughness: 0.5 })
+        surf({ color: i === 0 ? 0xf4c430 : 0xd4a030 - i * 0x101010, roughness: 0.5 })
       );
       dome.position.set(x, y + 0.9, z);
       this.scene.add(dome);
@@ -333,7 +344,7 @@ export class World {
     });
     const kalash = new THREE.Mesh(
       new THREE.SphereGeometry(0.35, 12, 12),
-      new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.6, roughness: 0.3 })
+      surf({ color: 0xffd700, metalness: 0.6, roughness: 0.3 })
     );
     kalash.position.set(x, y + 0.5, z);
     this.scene.add(kalash);
@@ -352,7 +363,7 @@ export class World {
     for (let i = 0; i < 6; i++) {
       const pillar = new THREE.Mesh(
         new THREE.CylinderGeometry(0.5, 0.65, 6, 8),
-        new THREE.MeshStandardMaterial({ color: 0x707070 })
+        surf({ color: 0x707070 })
       );
       pillar.position.set(-20 + i * 8, 3, z + i * 0.3);
       this.scene.add(pillar);
@@ -363,7 +374,7 @@ export class World {
   _localTrain(x, z) {
     const group = new THREE.Group();
     group.position.set(x, 0, z);
-    const purple = new THREE.MeshStandardMaterial({ color: 0x6a0dad, roughness: 0.5 });
+    const purple = surf({ color: 0x6a0dad, roughness: 0.5 });
     for (let c = 0; c < 3; c++) {
       const coach = new THREE.Mesh(new THREE.BoxGeometry(4, 2.8, 2.4), purple);
       coach.position.set(c * 4.2, 1.6, 0);
@@ -371,14 +382,14 @@ export class World {
       group.add(coach);
       const windowRow = new THREE.Mesh(
         new THREE.BoxGeometry(3.5, 0.8, 0.05),
-        new THREE.MeshStandardMaterial({ color: 0x87ceeb, emissive: 0x4488aa, emissiveIntensity: 0.15 })
+        surf({ color: 0x87ceeb, emissive: 0x4488aa, emissiveIntensity: 0.15 })
       );
       windowRow.position.set(c * 4.2, 2, 1.22);
       group.add(windowRow);
     }
     const track = new THREE.Mesh(
       new THREE.BoxGeometry(16, 0.15, 0.3),
-      new THREE.MeshStandardMaterial({ color: 0x4a4a4a, metalness: 0.8 })
+      surf({ color: 0x4a4a4a, metalness: 0.8 })
     );
     track.position.set(4, 0.08, 0);
     group.add(track);
@@ -434,7 +445,7 @@ export class World {
     for (let i = 0; i < 5; i++) {
       const cloth = new THREE.Mesh(
         new THREE.PlaneGeometry(0.8 + Math.random() * 0.5, 1 + Math.random()),
-        new THREE.MeshStandardMaterial({ color: colors[i % colors.length], side: THREE.DoubleSide })
+        surf({ color: colors[i % colors.length], side: THREE.DoubleSide })
       );
       cloth.position.set(x - span / 2 + i * (span / 5), 4.5 - Math.random() * 0.3, z);
       this.scene.add(cloth);
@@ -444,7 +455,7 @@ export class World {
   _palmTree(x, z) {
     const trunk = new THREE.Mesh(
       new THREE.CylinderGeometry(0.15, 0.28, 5, 8),
-      new THREE.MeshStandardMaterial({ color: 0x6a5030 })
+      surf({ color: 0x6a5030 })
     );
     trunk.position.set(x, 2.5, z);
     trunk.rotation.z = (Math.random() - 0.5) * 0.15;
@@ -454,7 +465,7 @@ export class World {
     for (let f = 0; f < 7; f++) {
       const leaf = new THREE.Mesh(
         new THREE.ConeGeometry(0.08, 3.5, 4),
-        new THREE.MeshStandardMaterial({ color: 0x2d6a30 })
+        surf({ color: 0x2d6a30 })
       );
       leaf.position.set(x, 5.2, z);
       leaf.rotation.x = 1.2;
@@ -465,31 +476,31 @@ export class World {
 
   _signMesh(main, sub, color) {
     const tex = signageTexture(main, sub, `#${color.toString(16).padStart(6, '0')}`);
-    return new THREE.Mesh(
-      new THREE.PlaneGeometry(4, 1.1),
-      new THREE.MeshStandardMaterial({
-        map: tex,
-        emissive: color,
-        emissiveIntensity: 0.35,
-        transparent: true,
-        side: THREE.DoubleSide,
-      })
-    );
+    const mat = IS_MOBILE
+      ? new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide })
+      : new THREE.MeshStandardMaterial({
+          map: tex,
+          emissive: color,
+          emissiveIntensity: 0.35,
+          transparent: true,
+          side: THREE.DoubleSide,
+        });
+    return new THREE.Mesh(new THREE.PlaneGeometry(4, 1.1), mat);
   }
 
   _detailedRickshaw(x, z, rot = 0) {
     const g = new THREE.Group();
     g.position.set(x, 0, z);
     g.rotation.y = rot;
-    const metal = new THREE.MeshStandardMaterial({ color: 0x2ecc71, roughness: 0.45 });
-    const yellow = new THREE.MeshStandardMaterial({ color: 0xf1c40f });
+    const metal = surf({ color: 0x2ecc71, roughness: 0.45 });
+    const yellow = surf({ color: 0xf1c40f });
     const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.9, 2.2), metal);
     body.position.y = 0.65;
     g.add(body);
     const roof = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.06, 2.1), yellow);
     roof.position.y = 1.15;
     g.add(roof);
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+    const wheelMat = surf({ color: 0x111111 });
     [[-0.7, 0.3], [0.7, 0.3], [0, -0.9]].forEach(([wx, wz]) => {
       const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.12, 16), wheelMat);
       wheel.rotation.z = Math.PI / 2;
@@ -504,13 +515,13 @@ export class World {
     g.position.set(x, 0, z);
     const body = new THREE.Mesh(
       new THREE.BoxGeometry(2, 1.1, 4.2),
-      new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
+      surf({ color: 0x1a1a1a })
     );
     body.position.y = 0.7;
     g.add(body);
     const stripe = new THREE.Mesh(
       new THREE.BoxGeometry(2.02, 0.25, 4.22),
-      new THREE.MeshStandardMaterial({ color: 0xf4c430 })
+      surf({ color: 0xf4c430 })
     );
     stripe.position.y = 0.55;
     g.add(stripe);
@@ -536,8 +547,8 @@ export class World {
         this.npcs.push(npc);
       } else if (data.type === 'vehicle') {
         const g = new THREE.Group();
-        const metal = new THREE.MeshStandardMaterial({ color: 0x2ecc71, roughness: 0.45 });
-        const yellow = new THREE.MeshStandardMaterial({ color: 0xf1c40f });
+        const metal = surf({ color: 0x2ecc71, roughness: 0.45 });
+        const yellow = surf({ color: 0xf1c40f });
         const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.9, 2.2), metal);
         body.position.y = 0.65;
         g.add(body);
@@ -545,7 +556,7 @@ export class World {
         roof.position.y = 1.15;
         g.add(roof);
         [[-0.7, 0.3], [0.7, 0.3], [0, -0.9]].forEach(([wx, wz]) => {
-          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.12, 16), new THREE.MeshStandardMaterial({ color: 0x111111 }));
+          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.12, 16), surf({ color: 0x111111 }));
           wheel.rotation.z = Math.PI / 2;
           wheel.position.set(wx, 0.32, wz);
           g.add(wheel);
@@ -560,13 +571,13 @@ export class World {
         group.add(entrance);
         const stairs = new THREE.Mesh(
           new THREE.BoxGeometry(3, 2, 4),
-          new THREE.MeshStandardMaterial({ color: 0x3a3a40 })
+          surf({ color: 0x3a3a40 })
         );
         stairs.position.set(0, -0.5, 1);
         group.add(stairs);
         const water = new THREE.Mesh(
           new THREE.PlaneGeometry(3, 3),
-          new THREE.MeshStandardMaterial({ color: 0x1a5a6a, transparent: true, opacity: 0.8, metalness: 0.4 })
+          surf({ color: 0x1a5a6a, transparent: true, opacity: 0.8, metalness: 0.4 })
         );
         water.rotation.x = -Math.PI / 2;
         water.position.set(0, 0.1, 2);
@@ -574,31 +585,28 @@ export class World {
       } else if (data.id === 'shrine') {
         const plinth = new THREE.Mesh(
           new THREE.CylinderGeometry(1.5, 1.8, 0.6, 8),
-          new THREE.MeshStandardMaterial({ color: 0xc9a87c })
+          surf({ color: 0xc9a87c })
         );
         plinth.position.y = 0.3;
         group.add(plinth);
         const idol = new THREE.Mesh(
           new THREE.BoxGeometry(0.8, 1.2, 0.6),
-          new THREE.MeshStandardMaterial({ color: 0xf4c430, emissive: 0xf4c430, emissiveIntensity: 0.15 })
+          surf({ color: 0xf4c430, emissive: 0xf4c430, emissiveIntensity: 0.15 })
         );
         idol.position.y = 1.2;
         group.add(idol);
       } else if (data.id === 'tiger-mural') {
-        const mural = new THREE.Mesh(
-          new THREE.PlaneGeometry(6, 4),
-          new THREE.MeshStandardMaterial({
-            map: signageTexture('🐯', 'TIGER CORRIDOR', '#e67e22'),
-            emissive: 0xe67e22,
-            emissiveIntensity: 0.2,
-          })
-        );
+        const muralTex = signageTexture('TIGER', 'CORRIDOR', '#e67e22');
+        const muralMat = IS_MOBILE
+          ? new THREE.MeshBasicMaterial({ map: muralTex })
+          : new THREE.MeshStandardMaterial({ map: muralTex, emissive: 0xe67e22, emissiveIntensity: 0.2 });
+        const mural = new THREE.Mesh(new THREE.PlaneGeometry(6, 4), muralMat);
         mural.position.set(0, 2.5, 0);
         group.add(mural);
       } else {
         const pillar = new THREE.Mesh(
           new THREE.CylinderGeometry(0.4, 0.5, 4, 8),
-          new THREE.MeshStandardMaterial({ color: data.color, emissive: data.color, emissiveIntensity: 0.12 })
+          surf({ color: data.color, emissive: data.color, emissiveIntensity: 0.12 })
         );
         pillar.position.y = 2;
         group.add(pillar);

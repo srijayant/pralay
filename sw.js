@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pralay-v5';
+const CACHE_NAME = 'pralay-v6';
 
 const ASSETS = [
   './',
@@ -7,6 +7,7 @@ const ASSETS = [
   './js/boot.js',
   './js/main.js',
   './js/character.js',
+  './js/materials.js',
   './js/world.js',
   './js/textures.js',
   './js/data/interactions.js',

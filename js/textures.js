@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { IS_MOBILE, surf } from './materials.js';
 
 export function makeCanvasTexture(drawFn, w = 512, h = 512) {
   const canvas = document.createElement('canvas');
@@ -133,7 +134,8 @@ export function signageTexture(text, subtext = '', color = '#ff4757') {
   }, 512, 128);
 }
 
-export function matFromTexture(tex, { roughness = 0.85, metalness = 0.05, repeat = [1, 1], emissive = null } = {}) {
+export function matFromTexture(tex, { roughness = 0.85, metalness = 0.05, repeat = [1, 1], emissive = null, fallback = 0x908070 } = {}) {
+  if (IS_MOBILE) return surf(fallback);
   tex.repeat.set(repeat[0], repeat[1]);
   const opts = { map: tex, roughness, metalness };
   if (emissive) {
