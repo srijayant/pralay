@@ -207,7 +207,7 @@ export class World {
   }
 
   _landmarks() {
-  const arch = new THREE.Mesh(
+    const arch = new THREE.Mesh(
       new THREE.TorusGeometry(3, 0.35, 8, 24, Math.PI),
       new THREE.MeshStandardMaterial({ color: 0xd4a574, roughness: 0.6 })
     );
