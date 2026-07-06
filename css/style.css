@@ -797,3 +797,70 @@ body {
   color: var(--gold);
   font-weight: 600;
 }
+
+/* PWA install banner */
+.install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, var(--bg-panel) 0%, #12140f 100%);
+  border-top: 1px solid var(--saffron);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.45);
+}
+
+.install-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.install-banner-text strong {
+  color: var(--gold);
+  font-family: var(--font-display);
+}
+
+.install-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-install {
+  background: var(--saffron);
+  color: #1a1008;
+  border: none;
+  padding: 0.65rem 1.1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.btn-install-dismiss {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+@media (display-mode: standalone) {
+  .install-banner {
+    display: none;
+  }
+}

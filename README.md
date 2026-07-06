@@ -28,6 +28,33 @@ On your phone, open `http://<your-computer-ip>:8080` (e.g. `http://192.168.1.5:8
 
 For play anywhere, deploy the folder to GitHub Pages, Netlify, or any static host.
 
+## Install as an app
+
+Pralay is a **Progressive Web App (PWA)** — you can install it on your phone or desktop and play offline.
+
+### Android (Chrome)
+
+1. Host the game (see [GitHub Pages](#github-pages) below) or open it on your LAN.
+2. Tap **Install** when the banner appears, or use the browser menu → **Install app** / **Add to Home screen**.
+
+### iPhone (Safari)
+
+1. Open the game URL in Safari.
+2. Tap the **Share** button → **Add to Home Screen**.
+3. Launch **Pralay** from your home screen — it runs fullscreen like a native app.
+
+### Desktop (Chrome / Edge)
+
+Use the install icon in the address bar, or **Install Pralay** from the in-game banner.
+
+After the first visit, the service worker caches game files so you can play without internet.
+
+### GitHub Pages
+
+After merging to `main`, enable **GitHub Pages** (Settings → Pages → Source: **GitHub Actions**). The workflow deploys automatically. Your game will be at:
+
+`https://<username>.github.io/pralay/`
+
 ## Gameplay
 
 - **Choose a region** — Ganga Basin, Deccan Plateau, Western Ghats, Thar Corridor, Himalayan Refuge, or Coastal Shores
@@ -46,4 +73,10 @@ You are a **Samskarak** (rebuilder). Twenty monsoon cycles to shape what comes n
 
 ## Tech
 
-Vanilla HTML, CSS, and ES modules. No build step required.
+Vanilla HTML, CSS, and ES modules. PWA with service worker for offline play. No build step required.
+
+To regenerate app icons:
+
+```bash
+python3 scripts/generate-icons.py
+```
