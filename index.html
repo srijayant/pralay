@@ -77,32 +77,80 @@
     <section id="screen-game" class="screen">
       <canvas id="game-canvas"></canvas>
 
-      <div id="hud">
-        <div class="hud-top">
-          <span id="hud-name" class="hud-name">—</span>
-          <span id="hud-zone" class="hud-zone">Marine Drive</span>
+      <div id="hud" class="pubg-hud">
+        <!-- Compass -->
+        <div class="hud-compass">
+          <div class="compass-track">
+            <span>N</span><span>NE</span><span>E</span><span>SE</span><span>S</span><span>SW</span><span>W</span><span>NW</span>
+          </div>
+          <div id="compass-needle" class="compass-needle">▼</div>
+          <span id="compass-label" class="compass-label">N</span>
         </div>
+
+        <!-- Player card (top left) -->
+        <div class="hud-player-card">
+          <div class="player-row">
+            <span class="player-icon">◉</span>
+            <span id="hud-name" class="hud-name">—</span>
+            <span id="hud-zone" class="hud-zone">Marine Drive</span>
+          </div>
+          <div class="stat-bar">
+            <span class="stat-icon hp">♥</span>
+            <div class="bar-track"><div id="bar-health" class="bar-fill bar-hp"></div></div>
+          </div>
+          <div class="stat-bar">
+            <span class="stat-icon st">⚡</span>
+            <div class="bar-track"><div id="bar-stamina" class="bar-fill bar-st"></div></div>
+          </div>
+        </div>
+
+        <!-- Minimap (top right) -->
+        <div class="hud-minimap-wrap">
+          <canvas id="minimap" width="130" height="130"></canvas>
+          <span class="minimap-label">MAP</span>
+          <span id="hud-coords" class="minimap-coords">0, 0</span>
+        </div>
+
+        <!-- Kill feed style log -->
+        <div id="hud-feed" class="hud-feed"></div>
+
+        <!-- Crosshair -->
+        <div class="crosshair"></div>
+
+        <!-- Interact prompt -->
         <div id="hud-prompt" class="hud-prompt hidden">
-          <span id="prompt-key">E</span>
+          <span class="prompt-btn">F</span>
           <span id="prompt-text">Interact</span>
         </div>
+
+        <!-- Dialogue panel -->
         <div id="hud-dialogue" class="hud-dialogue hidden">
-          <strong id="dialogue-speaker">—</strong>
+          <div class="dialogue-header">
+            <strong id="dialogue-speaker">—</strong>
+            <button id="dialogue-next" class="btn-dialogue-next">▶ NEXT</button>
+          </div>
           <p id="dialogue-text"></p>
-          <button id="dialogue-next" class="btn-small">Continue</button>
         </div>
-        <div id="hud-log" class="hud-log"></div>
       </div>
 
-      <!-- Mobile controls -->
-      <div id="mobile-controls" class="mobile-controls">
-        <div id="joystick-zone" class="joystick-zone"><div id="joystick-knob" class="joystick-knob"></div></div>
-        <button id="btn-run" class="mobile-btn mobile-run">RUN</button>
-        <button id="btn-interact" class="mobile-btn mobile-interact">E</button>
+      <!-- PUBG-style mobile controls -->
+      <div id="mobile-controls" class="mobile-controls pubg-controls">
+        <div id="joystick-zone" class="joystick-zone">
+          <div id="joystick-knob" class="joystick-knob"></div>
+        </div>
+        <div class="action-cluster">
+          <button id="btn-run" class="pubg-btn pubg-btn-sprint" title="Sprint">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.6 11 16.5 12.5 16.5 15H19c0-2.9-2-5.4-4.5-6.2l-1-5.8H9.8z"/></svg>
+          </button>
+          <button id="btn-interact" class="pubg-btn pubg-btn-action" title="Interact">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2a5 5 0 0 1 5 5v1h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h2V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v1h6V7a3 3 0 0 0-3-3z"/></svg>
+          </button>
+          <button id="btn-pause-mobile" class="pubg-btn pubg-btn-menu" title="Menu">☰</button>
+        </div>
       </div>
 
       <div class="controls-hint desktop-only">
-        WASD move · Shift run · E interact · Mouse drag look · Esc pause
+        WASD · Shift sprint · E interact · Drag to look · Esc menu
       </div>
     </section>
 

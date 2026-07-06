@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { createCharacter, updateCharacterAnim, readAvatarForm } from './character.js';
 import { World } from './world.js';
 import { getZoneAt } from './data/interactions.js';
+import { initHud, updateHud, addFeedMessage, showInteractPrompt } from './hud.js';
 
 const SCREENS = ['screen-title', 'screen-avatar', 'screen-game', 'screen-pause'];
 const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -22,13 +23,7 @@ function showScreen(id) {
 }
 
 function addLog(text) {
-  const log = document.getElementById('hud-log');
-  if (!log) return;
-  const entry = document.createElement('div');
-  entry.className = 'log-line';
-  entry.textContent = text;
-  log.prepend(entry);
-  if (log.children.length > 5) log.lastChild.remove();
+  addFeedMessage(text);
 }
 
 function waitFrame() {
@@ -98,6 +93,7 @@ class Game3D {
     setLoading(true, 'Almost ready…');
     await waitFrame();
     instance._resize();
+    initHud();
     return instance;
   }
 
@@ -148,6 +144,7 @@ class Game3D {
 
     this._setupJoystick();
     document.getElementById('btn-interact')?.addEventListener('click', () => this.interact());
+    document.getElementById('btn-pause-mobile')?.addEventListener('click', () => this.togglePause());
     document.getElementById('btn-run')?.addEventListener('touchstart', (e) => { e.preventDefault(); this.mobileInput.run = true; });
     document.getElementById('btn-run')?.addEventListener('touchend', () => { this.mobileInput.run = false; });
     document.getElementById('dialogue-next')?.addEventListener('click', () => this._advanceDialogue());
@@ -257,7 +254,15 @@ class Game3D {
 
     this.world.update(dt);
     this._updateInteractables();
-    document.getElementById('hud-zone').textContent = getZoneAt(this.player.position.x, this.player.position.z);
+    const zone = getZoneAt(this.player.position.x, this.player.position.z);
+    document.getElementById('hud-zone').textContent = zone;
+    updateHud(
+      this.player.position.x,
+      this.player.position.z,
+      this.player.rotation.y,
+      running,
+      moving
+    );
   }
 
   _updateInteractables() {
@@ -273,13 +278,11 @@ class Game3D {
       }
     }
     this.nearby = closest;
-    const prompt = document.getElementById('hud-prompt');
     if (closest) {
       closest.getObjectByName('highlight').visible = true;
-      prompt?.classList.remove('hidden');
-      document.getElementById('prompt-text').textContent = closest.userData.interactable.name;
+      showInteractPrompt(true, closest.userData.interactable.name);
     } else {
-      prompt?.classList.add('hidden');
+      showInteractPrompt(false);
     }
   }
 
