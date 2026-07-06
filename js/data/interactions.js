@@ -44,7 +44,7 @@ export const INTERACTABLES = [
     dialogue: [
       'Stairs descend into black water. Emergency lights still blink below.',
       'Scavengers say sealed train cars hold pre-Sundering data drives.',
-      'A child's chalk drawing on the wall: "home is up".',
+      "A child's chalk drawing on the wall: home is up.",
     ],
   },
   {

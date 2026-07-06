@@ -311,8 +311,8 @@ function initAvatarPreview() {
   const container = document.getElementById('avatar-preview');
   if (!container) return;
 
-  const w = container.clientWidth;
-  const h = container.clientHeight;
+  const w = container.clientWidth || 320;
+  const h = container.clientHeight || 280;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(w, h);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -364,7 +364,7 @@ function stopPreview() {
   }
 }
 
-function startGame() {
+export function startGame() {
   const config = readAvatarForm();
   showScreen('screen-game');
   const canvas = document.getElementById('game-canvas');
@@ -372,17 +372,7 @@ function startGame() {
   game.start();
 }
 
-function bindUI() {
-  document.getElementById('btn-play')?.addEventListener('click', () => {
-    showScreen('screen-avatar');
-    initAvatarPreview();
-  });
-
-  document.getElementById('btn-enter-world')?.addEventListener('click', () => {
-    stopPreview();
-    startGame();
-  });
-
+export function bindPauseUI() {
   document.getElementById('btn-resume')?.addEventListener('click', () => {
     if (game) {
       game.paused = false;
@@ -397,4 +387,4 @@ function bindUI() {
   });
 }
 
-bindUI();
+export { initAvatarPreview, stopPreview };
