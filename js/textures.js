@@ -7,7 +7,7 @@ export function makeCanvasTexture(drawFn, w = 512, h = 512) {
   drawFn(canvas.getContext('2d'), w, h);
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.colorSpace = THREE.SRGBColorSpace;
+  if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
 

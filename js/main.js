@@ -4,9 +4,17 @@ import { World } from './world.js';
 import { getZoneAt } from './data/interactions.js';
 
 const SCREENS = ['screen-title', 'screen-avatar', 'screen-game', 'screen-pause'];
+const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 let game = null;
 let previewScene = null;
+
+export function setLoading(show, text = 'Loading Mumbai…') {
+  const el = document.getElementById('loading-overlay');
+  const label = document.getElementById('loading-text');
+  if (label) label.textContent = text;
+  el?.classList.toggle('hidden', !show);
+}
 
 function showScreen(id) {
   SCREENS.forEach((s) => document.getElementById(s)?.classList.remove('active'));
@@ -23,6 +31,10 @@ function addLog(text) {
   if (log.children.length > 5) log.lastChild.remove();
 }
 
+function waitFrame() {
+  return new Promise((r) => requestAnimationFrame(() => r()));
+}
+
 class Game3D {
   constructor(canvas, avatarConfig, player) {
     this.config = avatarConfig;
@@ -34,17 +46,21 @@ class Game3D {
     this.dialogueQueue = [];
     this.dialogueIndex = 0;
 
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    this.renderer.shadowMap.enabled = true;
+    this.renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: !IS_MOBILE,
+      powerPreference: IS_MOBILE ? 'low-power' : 'high-performance',
+    });
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, IS_MOBILE ? 1.5 : 2));
+    this.renderer.shadowMap.enabled = !IS_MOBILE;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.15;
 
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x8a7a6a, 0.0045);
+    this.scene.fog = new THREE.FogExp2(0x8a7a6a, IS_MOBILE ? 0.005 : 0.0045);
 
-    this.camera = new THREE.PerspectiveCamera(58, 1, 0.1, 400);
+    this.camera = new THREE.PerspectiveCamera(58, 1, 0.1, 300);
     this.world = new World(this.scene);
 
     this.player = player;
@@ -61,28 +77,40 @@ class Game3D {
   }
 
   static async create(canvas, avatarConfig) {
-    const instance = new Game3D(canvas, avatarConfig, await createCharacter(avatarConfig));
-    await instance.world.build();
+    setLoading(true, 'Creating your survivor…');
+    await waitFrame();
+    const player = createCharacter(avatarConfig);
+
+    setLoading(true, 'Building Mumbai ruins…');
+    await waitFrame();
+    const instance = new Game3D(canvas, avatarConfig, player);
+    instance.world.build();
+
+    setLoading(true, 'Almost ready…');
+    await waitFrame();
+    instance._resize();
     return instance;
   }
 
   _lights() {
-    this.scene.add(new THREE.HemisphereLight(0xc9b8a8, 0x3a4a5a, 0.65));
-    const sun = new THREE.DirectionalLight(0xffa85a, 0.95);
+    this.scene.add(new THREE.HemisphereLight(0xc9b8a8, 0x3a4a5a, 0.7));
+    const sun = new THREE.DirectionalLight(0xffa85a, 0.9);
     sun.position.set(-50, 45, 20);
-    sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
-    sun.shadow.camera.near = 1;
-    sun.shadow.camera.far = 180;
-    const s = 70;
-    sun.shadow.camera.left = -s;
-    sun.shadow.camera.right = s;
-    sun.shadow.camera.top = s;
-    sun.shadow.camera.bottom = -s;
+    if (!IS_MOBILE) {
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024);
+      sun.shadow.camera.near = 1;
+      sun.shadow.camera.far = 120;
+      const s = 60;
+      sun.shadow.camera.left = -s;
+      sun.shadow.camera.right = s;
+      sun.shadow.camera.top = s;
+      sun.shadow.camera.bottom = -s;
+    }
     this.scene.add(sun);
 
-    [[12, 6, -8, 0xff6b6b], [-18, 5, 14, 0x48dbfb], [0, 4, -28, 0xf4c430]].forEach(([x, y, z, c]) => {
-      const pl = new THREE.PointLight(c, 0.7, 45);
+    [[12, 6, -8, 0xff6b6b], [-18, 5, 14, 0x48dbfb]].forEach(([x, y, z, c]) => {
+      const pl = new THREE.PointLight(c, 0.6, 40);
       pl.position.set(x, y, z);
       this.scene.add(pl);
     });
@@ -159,8 +187,10 @@ class Game3D {
   }
 
   _resize() {
-    const w = this.renderer.domElement.clientWidth;
-    const h = this.renderer.domElement.clientHeight;
+    const parent = this.renderer.domElement.parentElement;
+    const w = parent?.clientWidth || window.innerWidth;
+    const h = parent?.clientHeight || window.innerHeight;
+    if (w < 1 || h < 1) return;
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h, false);
@@ -186,7 +216,7 @@ class Game3D {
     if (this.paused) return;
 
     const { mx, mz, running } = this._getMoveInput();
-    const speed = running ? 8 : 4.5;
+    const speed = running ? 7 : 4;
     const moving = Math.hypot(mx, mz) > 0.05;
 
     if (moving) {
@@ -208,8 +238,8 @@ class Game3D {
 
     updateCharacterAnim(this.player, dt, moving ? speed : 0);
 
-    const camDist = 6.5;
-    const camH = 2.8;
+    const camDist = 6;
+    const camH = 2.6;
     const cx = this.player.position.x + Math.sin(this.yaw) * camDist;
     const cz = this.player.position.z + Math.cos(this.yaw) * camDist;
     this.camera.position.lerp(new THREE.Vector3(cx, this.player.position.y + camH, cz), 0.1);
@@ -295,12 +325,15 @@ export async function initAvatarPreview() {
   const container = document.getElementById('avatar-preview');
   if (!container) return;
 
+  setLoading(true, 'Loading character preview…');
+  await waitFrame();
+
   const w = container.clientWidth || 320;
   const h = container.clientHeight || 280;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(w, h);
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  container.appendChild(renderer.domElement);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, IS_MOBILE ? 1.5 : 2));
+  container.replaceChildren(renderer.domElement);
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x2a2038);
@@ -313,30 +346,31 @@ export async function initAvatarPreview() {
   light.position.set(2, 4, 3);
   scene.add(light);
 
-  let avatar = await createCharacter(readAvatarForm());
+  let avatar = createCharacter(readAvatarForm());
   scene.add(avatar);
 
-  const refresh = async () => {
+  const refresh = () => {
     scene.remove(avatar);
-    avatar = await createCharacter(readAvatarForm());
+    avatar = createCharacter(readAvatarForm());
     scene.add(avatar);
     if (previewScene) previewScene.avatar = avatar;
   };
 
   ['avatar-skin', 'avatar-shirt', 'avatar-pants', 'avatar-style'].forEach((id) => {
-    document.getElementById(id)?.addEventListener('input', () => refresh());
-    document.getElementById(id)?.addEventListener('change', () => refresh());
+    document.getElementById(id)?.addEventListener('input', refresh);
+    document.getElementById(id)?.addEventListener('change', refresh);
   });
 
-  previewScene = { renderer, scene, camera, avatar, t: 0 };
-  const spin = (time) => {
+  previewScene = { renderer, scene, camera, avatar };
+  const spin = () => {
     if (!previewScene) return;
-    previewScene.avatar.rotation.y = time * 0.0008;
+    previewScene.avatar.rotation.y += 0.008;
     updateCharacterAnim(previewScene.avatar, 0.016, 2);
     previewScene.renderer.render(previewScene.scene, previewScene.camera);
     previewScene.raf = requestAnimationFrame(spin);
   };
-  spin(0);
+  spin();
+  setLoading(false);
 }
 
 export function stopPreview() {
@@ -350,10 +384,16 @@ export function stopPreview() {
 
 export async function startGame() {
   const config = readAvatarForm();
-  showScreen('screen-game');
   const canvas = document.getElementById('game-canvas');
-  game = await Game3D.create(canvas, config);
-  game.start();
+
+  try {
+    showScreen('screen-game');
+    await waitFrame();
+    game = await Game3D.create(canvas, config);
+    game.start();
+  } finally {
+    setLoading(false);
+  }
 }
 
 export function bindPauseUI() {

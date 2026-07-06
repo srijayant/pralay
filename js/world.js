@@ -6,6 +6,8 @@ import {
   artDecoFacadeTexture, brickChawlTexture, signageTexture, matFromTexture,
 } from './textures.js';
 
+const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 export class World {
   constructor(scene) {
     this.scene = scene;
@@ -15,7 +17,7 @@ export class World {
     this.npcs = [];
   }
 
-  async build() {
+  build() {
     this._sky();
     this._arabianSea();
     this._marineDrive();
@@ -23,7 +25,7 @@ export class World {
     this._landmarks();
     this._streetNetwork();
     this._overheadDetails();
-    await this._interactables();
+    this._interactables();
     this._atmosphere();
   }
 
@@ -84,7 +86,7 @@ export class World {
     wall.receiveShadow = true;
     this.scene.add(wall);
 
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < (IS_MOBILE ? 7 : 14); i++) {
       this._palmTree(-38 + i * 5.5, -28 + Math.sin(i * 0.4) * 2);
     }
   }
@@ -515,7 +517,7 @@ export class World {
     this.scene.add(g);
   }
 
-  async _interactables() {
+  _interactables() {
     const npcConfigs = {
       'chai-wallah': { skin: 2, shirt: '#ffffff', pants: '#2c3e50', style: 'wanderer' },
       engineer: { skin: 3, shirt: '#48dbfb', pants: '#2d3436', style: 'scavenger' },
@@ -529,7 +531,7 @@ export class World {
 
       if (data.type === 'npc') {
         const cfg = npcConfigs[data.id] || { skin: 2, shirt: '#e8841a', pants: '#2d3a4a', style: 'wanderer' };
-        const npc = await createCharacter(cfg);
+        const npc = createCharacter(cfg);
         group.add(npc);
         this.npcs.push(npc);
       } else if (data.type === 'vehicle') {
@@ -622,7 +624,7 @@ export class World {
   }
 
   _atmosphere() {
-    const rainCount = 400;
+    const rainCount = IS_MOBILE ? 120 : 300;
     const geo = new THREE.BufferGeometry();
     const pos = new Float32Array(rainCount * 3);
     for (let i = 0; i < rainCount; i++) {
